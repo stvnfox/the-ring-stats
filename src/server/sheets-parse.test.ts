@@ -169,4 +169,15 @@ describe("parseTeamScores", () => {
 			onMatchPoint: false,
 		});
 	});
+
+	it("parses European decimal comma in TotalScore (43,2 not 432)", () => {
+		const values = [
+			["Team", "TotalScore", "MatchPoint"],
+			["Alpha", "43,2", ""],
+			["Beta", "42,1", ""],
+		];
+		const rows = parseTeamScores(values);
+		expect(rows[0]).toMatchObject({ rank: 1, name: "Alpha", score: 43.2 });
+		expect(rows[1]).toMatchObject({ rank: 2, name: "Beta", score: 42.1 });
+	});
 });

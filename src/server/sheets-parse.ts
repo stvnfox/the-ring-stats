@@ -60,9 +60,43 @@ function findDiscordColumn(headers: string[], names: string[]): number {
 	return -1;
 }
 
+/**
+ * Parses a cell number. Handles US (`1,234.56`) and European (`1.234,56`, `43,2`)
+ * formats. Previously we stripped all commas, so `43,2` became `432` instead of `43.2`.
+ */
 function parseNumber(raw: string): number | null {
-	const cleaned = raw.replace(/,/g, "").replace(/^\s+|\s+$/g, "");
+	const cleaned = raw.replace(/^\s+|\s+$/g, "");
 	if (cleaned === "") return null;
+
+	const lastComma = cleaned.lastIndexOf(",");
+	const lastPeriod = cleaned.lastIndexOf(".");
+
+	// Both separators: the rightmost one is the decimal separator
+	if (lastComma >= 0 && lastPeriod >= 0) {
+		if (lastComma > lastPeriod) {
+			// European: 1.234,56
+			const normalized = cleaned.replace(/\./g, "").replace(",", ".");
+			const n = Number.parseFloat(normalized);
+			return Number.isFinite(n) ? n : null;
+		}
+		// US: 1,234.56
+		const normalized = cleaned.replace(/,/g, "");
+		const n = Number.parseFloat(normalized);
+		return Number.isFinite(n) ? n : null;
+	}
+
+	// Only comma: decimal comma (43,2) vs thousands (1,234)
+	if (lastComma >= 0 && lastPeriod < 0) {
+		const parts = cleaned.split(",");
+		if (parts.length === 2 && parts[1] !== undefined && parts[1].length <= 2) {
+			const n = Number.parseFloat(`${parts[0]}.${parts[1]}`);
+			return Number.isFinite(n) ? n : null;
+		}
+		const n = Number.parseFloat(cleaned.replace(/,/g, ""));
+		return Number.isFinite(n) ? n : null;
+	}
+
+	// Plain number (43.2, 432, etc.)
 	const n = Number.parseFloat(cleaned);
 	return Number.isFinite(n) ? n : null;
 }
