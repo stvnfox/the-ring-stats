@@ -17,7 +17,10 @@ import {
   TableRow,
 } from "#/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
-import { getDashboardRefetchInterval } from "#/lib/dashboard-refetch";
+import {
+  getDashboardRefetchInterval,
+  isDashboardAutoRefetchDisabled,
+} from "#/lib/dashboard-refetch";
 import type { LeaderboardRow, MapScoreBlock } from "#/lib/dashboard-types";
 import { getDashboardData } from "#/server/get-dashboard-data";
 
@@ -53,10 +56,14 @@ function formatTournamentDate(raw: string | undefined) {
 
 function HomeDashboard() {
   const fetchDashboard = useServerFn(getDashboardData);
+  const noAutoRefetch = isDashboardAutoRefetchDisabled();
   const { data, isLoading, error, dataUpdatedAt, isFetching } = useQuery({
     queryKey: ["dashboard"],
     queryFn: () => fetchDashboard(),
     refetchInterval: getDashboardRefetchInterval,
+    // refetchInterval: false does not stop focus/reconnect refetches — turn those off when polling is off
+    refetchOnWindowFocus: !noAutoRefetch,
+    refetchOnReconnect: !noAutoRefetch,
   });
 
   const errMessage =

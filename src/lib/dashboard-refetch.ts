@@ -4,13 +4,22 @@ import type { DashboardData } from "#/lib/dashboard-types";
 
 const DEFAULT_MS = 30_000;
 
-/** Polling interval from env. `0` = disabled (no automatic refetch). */
+/** Polling interval from env. `0` = disabled (no timer; use `isDashboardAutoRefetchDisabled()` for other defaults). */
 export function getDashboardRefetchIntervalMs(): number {
 	const raw = import.meta.env.VITE_DASHBOARD_REFETCH_MS;
 	if (raw === undefined || raw === "") return DEFAULT_MS;
-	const n = Number.parseInt(String(raw), 10);
+
+	const s = String(raw).trim().toLowerCase();
+	if (s === "false" || s === "off" || s === "no") return 0;
+
+	const n = Number.parseInt(s, 10);
 	if (!Number.isFinite(n) || n < 0) return DEFAULT_MS;
 	return n;
+}
+
+/** True when `VITE_DASHBOARD_REFETCH_MS` is 0 (or false/off/no): no poll timer and no focus/reconnect refetches. */
+export function isDashboardAutoRefetchDisabled(): boolean {
+	return getDashboardRefetchIntervalMs() <= 0;
 }
 
 /**
