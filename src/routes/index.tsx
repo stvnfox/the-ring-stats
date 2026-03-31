@@ -138,19 +138,19 @@ function HomeDashboard() {
         <>
           <div className="mt-10 grid gap-8 lg:grid-cols-2">
             <LeaderboardCard
-              title="Top fraggers"
-              description="Individual scores per player."
-              rows={data.topFraggers}
-              scoreHeader="Score"
-              emptyHint="No scores available yet. Will be updated when the event starts."
-            />
-            <LeaderboardCard
               title="Team leaderboard"
               description="Total scores per team."
               rows={data.teamScores}
               scoreHeader="Points"
               showMatchPoint
               emptyHint="No team scores available yet. Will be updated when the event starts."
+            />
+            <LeaderboardCard
+              title="Top fraggers"
+              description="Individual scores per player."
+              rows={data.topFraggers}
+              scoreHeader="Score"
+              emptyHint="No scores available yet. Will be updated when the event starts."
             />
           </div>
 
