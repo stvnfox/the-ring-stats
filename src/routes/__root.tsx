@@ -31,11 +31,19 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         title: "The Ring — Tourney stats",
       },
+      {
+        name: "theme-color",
+        content: "#173a40",
+      },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "manifest",
+        href: "/manifest.json",
       },
     ],
   }),
