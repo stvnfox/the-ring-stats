@@ -6,6 +6,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { nitro } from 'nitro/vite'
 
 const config = defineConfig({
   plugins: [
@@ -14,6 +15,10 @@ const config = defineConfig({
     tailwindcss(),
     tanstackStart(),
     viteReact(),
+    nitro({
+      // Vercel sets VERCEL=1 during build; use vercel preset there. Local builds stay node-server.
+      preset: process.env.VERCEL ? 'vercel' : undefined,
+    }),
   ],
 })
 
