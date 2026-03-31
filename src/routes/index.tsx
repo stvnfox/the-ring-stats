@@ -101,7 +101,7 @@ function HomeDashboard() {
 
       {isLoading && (
         <p className="mt-10 text-center text-[var(--sea-ink-soft)]">
-          Loading spreadsheet…
+          Loading data...
         </p>
       )}
 
