@@ -1,11 +1,14 @@
 import type { DashboardData } from "#/lib/dashboard-types";
+import { tournamentSheetDateIsStrictlyFuture } from "#/server/sheets-parse";
 
 /** Preview data for layout / design when the sheet is empty or unreachable. */
 export function getSampleDashboardData(): DashboardData {
+	const tournamentDate = "12-04-2026";
 	return {
 		hasPlannedTournament: true,
 		tournamentLabel: "Spring Cup 2026 (sample)",
-		tournamentDate: "2026-04-12",
+		tournamentDate,
+		isInFuture: tournamentSheetDateIsStrictlyFuture(tournamentDate),
 		topFraggers: [
 			{ rank: 1, name: "vex", score: 47 },
 			{ rank: 2, name: "nio", score: 41 },

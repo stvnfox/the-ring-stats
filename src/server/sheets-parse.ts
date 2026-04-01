@@ -4,6 +4,10 @@ import type {
 	MapScoreBlock,
 	MapTeamRow,
 } from "#/lib/dashboard-types";
+import {
+	parseTournamentSheetDateToYmd,
+	type TournamentSheetYmd,
+} from "#/lib/tournament-sheet-date";
 
 function normalizeHeader(cell: string): string {
 	return cell.trim().toLowerCase().replace(/\s+/g, " ");
@@ -121,19 +125,106 @@ function isCurrentColumnCell(raw: string): boolean {
 	);
 }
 
+/** “Today” vs event dates for the home dashboard (Dutch local calendar). */
+const DASHBOARD_CALENDAR_TIMEZONE = "Europe/Amsterdam";
+
+function getCalendarYmdInZone(inst: Date, timeZone: string): TournamentSheetYmd {
+	const formatter = new Intl.DateTimeFormat("en-US", {
+		timeZone,
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	});
+	let y = 0;
+	let m = 0;
+	let d = 0;
+	for (const p of formatter.formatToParts(inst)) {
+		if (p.type === "year") y = Number(p.value);
+		else if (p.type === "month") m = Number(p.value);
+		else if (p.type === "day") d = Number(p.value);
+	}
+	return { y, m, d };
+}
+
+function calendarYmdKey(ymd: TournamentSheetYmd): number {
+	return ymd.y * 10000 + ymd.m * 100 + ymd.d;
+}
+
+/**
+ * Sheet date cell → calendar Y-M-D. Primary format **DD-MM-YYYY**; then
+ * **YYYY-MM-DD** prefix (`parseTournamentSheetDateToYmd`); else `Date.parse`
+ * and the calendar day in `timeZone`.
+ */
+function sheetTournamentDateToCalendarYmd(
+	raw: string,
+	timeZone: string,
+): TournamentSheetYmd | null {
+	const fromCell = parseTournamentSheetDateToYmd(raw);
+	if (fromCell) return fromCell;
+	const s = raw.trim();
+	const t = Date.parse(s);
+	if (Number.isNaN(t)) return null;
+	return getCalendarYmdInZone(new Date(t), timeZone);
+}
+
+/**
+ * True when the event’s calendar date is strictly before “today” in `timeZone`.
+ * Missing or unparsable dates are not treated as past.
+ */
+function isPastTournamentDay(
+	rawDate: string | undefined,
+	now: Date,
+	timeZone: string,
+): boolean {
+	if (!rawDate?.trim()) return false;
+	const eventYmd = sheetTournamentDateToCalendarYmd(rawDate, timeZone);
+	if (!eventYmd) return false;
+	const todayYmd = getCalendarYmdInZone(now, timeZone);
+	return calendarYmdKey(eventYmd) < calendarYmdKey(todayYmd);
+}
+
+/** True when the sheet date is strictly after “today” in `timeZone`. */
+function isStrictlyFutureTournamentDay(
+	rawDate: string | undefined,
+	now: Date,
+	timeZone: string,
+): boolean {
+	if (!rawDate?.trim()) return false;
+	const eventYmd = sheetTournamentDateToCalendarYmd(rawDate, timeZone);
+	if (!eventYmd) return false;
+	const todayYmd = getCalendarYmdInZone(now, timeZone);
+	return calendarYmdKey(eventYmd) > calendarYmdKey(todayYmd);
+}
+
+/** Same rules as the home dashboard display row (for dummy data / reuse). */
+export function tournamentSheetDateIsStrictlyFuture(
+	raw: string | undefined,
+	options?: { now?: Date; calendarTimeZone?: string },
+): boolean {
+	const now = options?.now ?? new Date();
+	const tz =
+		options?.calendarTimeZone?.trim() || DASHBOARD_CALENDAR_TIMEZONE;
+	return isStrictlyFutureTournamentDay(raw, now, tz);
+}
+
 export function parseTournamentState(
 	headers: string[],
 	dataRows: string[][],
+	options?: { now?: Date; calendarTimeZone?: string },
 ): {
 	hasPlannedTournament: boolean;
 	tournamentLabel?: string;
 	tournamentDate?: string;
+	isInFuture: boolean;
 } {
+	const now = options?.now ?? new Date();
+	const calendarTz =
+		options?.calendarTimeZone?.trim() || DASHBOARD_CALENDAR_TIMEZONE;
 	const nonEmptyRows = dataRows.filter((row) =>
 		row.some((c) => c.trim() !== ""),
 	);
 	if (nonEmptyRows.length === 0) {
-		return { hasPlannedTournament: false };
+		return { hasPlannedTournament: false, isInFuture: false };
 	}
 
 	const statusIdx = findColumnIndex(headers, [
@@ -186,15 +277,31 @@ export function parseTournamentState(
 		return Boolean(st && INACTIVE_STATUS.test(st));
 	}
 
+	function rowIsLiveStatus(row: string[]): boolean {
+		if (statusIdx < 0) return false;
+		const st = (row[statusIdx] ?? "").trim();
+		return Boolean(st && LIVE_STATUS.test(st));
+	}
+
+	/**
+	 * Home dashboard: hide past start dates vs “today” in Europe/Amsterdam. Live still wins
+	 * for multi-day events. “Current” does not override a past date (sheet often left checked).
+	 */
+	function rowEligibleForHome(row: string[]): boolean {
+		if (rowIsInactive(row)) return false;
+		if (rowIsLiveStatus(row)) return true;
+		if (isPastTournamentDay(rowDate(row), now, calendarTz)) return false;
+		if (currentIdx >= 0 && isCurrentColumnCell(row[currentIdx] ?? ""))
+			return true;
+		return true;
+	}
+
 	let hasPlannedTournament = false;
-	if (statusIdx >= 0) {
-		for (const row of nonEmptyRows) {
-			if (rowIsInactive(row)) continue;
+	for (const row of nonEmptyRows) {
+		if (rowEligibleForHome(row)) {
 			hasPlannedTournament = true;
 			break;
 		}
-	} else {
-		hasPlannedTournament = true;
 	}
 
 	/** Row whose name/date appear in the dashboard hero — matches displayed stats */
@@ -202,6 +309,7 @@ export function parseTournamentState(
 
 	if (currentIdx >= 0) {
 		for (const row of nonEmptyRows) {
+			if (!rowEligibleForHome(row)) continue;
 			if (isCurrentColumnCell(row[currentIdx] ?? "")) {
 				displayRow = row;
 				break;
@@ -211,9 +319,8 @@ export function parseTournamentState(
 
 	if (!displayRow && statusIdx >= 0) {
 		for (const row of nonEmptyRows) {
-			if (rowIsInactive(row)) continue;
-			const st = (row[statusIdx] ?? "").trim();
-			if (LIVE_STATUS.test(st)) {
+			if (!rowEligibleForHome(row)) continue;
+			if (rowIsLiveStatus(row)) {
 				displayRow = row;
 				break;
 			}
@@ -222,20 +329,32 @@ export function parseTournamentState(
 
 	if (!displayRow && statusIdx >= 0) {
 		for (const row of nonEmptyRows) {
-			if (rowIsInactive(row)) continue;
+			if (!rowEligibleForHome(row)) continue;
 			displayRow = row;
 			break;
 		}
 	}
 
 	if (!displayRow && statusIdx < 0) {
-		displayRow = nonEmptyRows[0];
+		for (const row of nonEmptyRows) {
+			if (!rowEligibleForHome(row)) continue;
+			displayRow = row;
+			break;
+		}
 	}
+
+	const tournamentDate = displayRow ? rowDate(displayRow) : undefined;
+	const isInFuture = isStrictlyFutureTournamentDay(
+		tournamentDate,
+		now,
+		calendarTz,
+	);
 
 	return {
 		hasPlannedTournament,
 		tournamentLabel: displayRow ? rowLabel(displayRow) : undefined,
-		tournamentDate: displayRow ? rowDate(displayRow) : undefined,
+		tournamentDate,
+		isInFuture,
 	};
 }
 
@@ -778,6 +897,7 @@ export type SplitStackedArchiveResult = {
 	teams: string[][];
 	maps: string[][];
 	eventLabel?: string;
+	/** EventDate / Date meta row (col B); **DD-MM-YYYY** like the main Tournaments tab */
 	eventDate?: string;
 };
 

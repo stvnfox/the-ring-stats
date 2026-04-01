@@ -15,6 +15,7 @@ import {
 } from "#/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import type { DashboardData, LeaderboardRow, MapScoreBlock } from "#/lib/dashboard-types";
+import { parseTournamentSheetDateToYmd } from "#/lib/tournament-sheet-date";
 
 export function formatScore(score: number | null) {
   if (score === null) return "—";
@@ -34,11 +35,23 @@ export function formatUpdatedAt(iso: string) {
 
 export function formatTournamentDate(raw: string | undefined) {
   if (!raw?.trim()) return null;
-  const t = Date.parse(raw);
-  if (!Number.isNaN(t)) {
-    return new Date(t).toLocaleDateString(undefined, {
+  const ymd = parseTournamentSheetDateToYmd(raw);
+  if (ymd) {
+    return new Date(ymd.y, ymd.m - 1, ymd.d).toLocaleDateString(undefined, {
       dateStyle: "long",
     });
+  }
+  // Avoid Date.parse for d/m/y-looking strings: engines often use US M/D/Y (wrong for NL sheets).
+  const looksLikeNumericDate = /^\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}/.test(
+    raw.trim(),
+  );
+  if (!looksLikeNumericDate) {
+    const t = Date.parse(raw.trim());
+    if (!Number.isNaN(t)) {
+      return new Date(t).toLocaleDateString(undefined, {
+        dateStyle: "long",
+      });
+    }
   }
   return raw.trim();
 }

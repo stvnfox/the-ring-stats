@@ -27,10 +27,12 @@ export type MapScoreBlock = {
 
 export type DashboardData = {
 	hasPlannedTournament: boolean;
-	/** Tournaments tab row that matches the stats shown (not “next upcoming” by default) */
+	/** Tournaments tab row that matches the stats shown; past-dated rows are hidden on home (vs NL date) unless live */
 	tournamentLabel?: string;
-	/** Same row: optional date cell (e.g. Date / Start) */
+	/** Same row: date cell, **DD-MM-YYYY** in the sheet (ISO prefix also accepted when parsing) */
 	tournamentDate?: string;
+	/** Display row date is strictly after today (Europe/Amsterdam); false if missing/unparseable */
+	isInFuture: boolean;
 	topFraggers: LeaderboardRow[];
 	teamScores: LeaderboardRow[];
 	/** Per-map team scores from the Map scores tab */

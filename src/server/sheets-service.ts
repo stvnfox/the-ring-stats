@@ -93,14 +93,33 @@ async function fetchSheetDashboard(): Promise<DashboardData> {
 	const { headers: tHeaders, dataRows: tRows } = splitHeaderAndRows(tValues);
 	const tournament = parseTournamentState(tHeaders, tRows);
 
+	const topFraggers = parseTopFraggers(fValues);
+	const teamScores = parseTeamScores(sValues);
+	const mapScores = parseMapScores(mValues);
+	const fetchedAt = new Date().toISOString();
+
+	if (!tournament.hasPlannedTournament) {
+		return {
+			hasPlannedTournament: false,
+			tournamentLabel: undefined,
+			tournamentDate: undefined,
+			isInFuture: false,
+			topFraggers: [],
+			teamScores: [],
+			mapScores: [],
+			fetchedAt,
+		};
+	}
+
 	return {
-		hasPlannedTournament: tournament.hasPlannedTournament,
+		hasPlannedTournament: true,
 		tournamentLabel: tournament.tournamentLabel,
 		tournamentDate: tournament.tournamentDate,
-		topFraggers: parseTopFraggers(fValues),
-		teamScores: parseTeamScores(sValues),
-		mapScores: parseMapScores(mValues),
-		fetchedAt: new Date().toISOString(),
+		isInFuture: tournament.isInFuture,
+		topFraggers,
+		teamScores,
+		mapScores,
+		fetchedAt,
 	};
 }
 
@@ -119,7 +138,11 @@ export async function fetchDashboardFromSheets(): Promise<DashboardData> {
 
 	try {
 		const data = await fetchSheetDashboard();
-		if (useDummy && isEmptyLeaderboards(data)) {
+		if (
+			useDummy &&
+			isEmptyLeaderboards(data) &&
+			data.hasPlannedTournament
+		) {
 			return getSampleDashboardData();
 		}
 		return data;

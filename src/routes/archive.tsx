@@ -36,10 +36,7 @@ function ArchivePage() {
     queryFn: () => listFn(),
   });
 
-  const titles = useMemo(
-    () => tabs?.map((x) => x.tabTitle) ?? [],
-    [tabs],
-  );
+  const titles = useMemo(() => tabs?.map((x) => x.tabTitle) ?? [], [tabs]);
 
   const selectedTab = useMemo(() => {
     if (searchTab && titles.includes(searchTab)) return searchTab;
@@ -81,8 +78,7 @@ function ArchivePage() {
           )}
         </h1>
         <p className="mb-6 max-w-2xl text-base text-[var(--sea-ink-soft)] sm:text-lg">
-          Select a completed event. Data is read from the archive spreadsheet
-          (stacked Player, Team, and Map sections per tab).
+          Show archived tournament data.
         </p>
 
         <div className="flex max-w-md flex-col gap-2">
@@ -124,7 +120,9 @@ function ArchivePage() {
         {data && (
           <p className="mt-4 text-sm text-[var(--sea-ink-soft)]">
             Loaded{" "}
-            <time dateTime={data.fetchedAt}>{formatUpdatedAt(data.fetchedAt)}</time>
+            <time dateTime={data.fetchedAt}>
+              {formatUpdatedAt(data.fetchedAt)}
+            </time>
           </p>
         )}
       </section>
@@ -149,7 +147,9 @@ function ArchivePage() {
         <section className="island-shell mt-10 rounded-2xl p-8 text-center">
           <p className="text-[var(--sea-ink-soft)]">
             No tournament tabs found. Set{" "}
-            <code className="text-[var(--sea-ink)]">GOOGLE_ARCHIVE_SPREADSHEET_ID</code>{" "}
+            <code className="text-[var(--sea-ink)]">
+              GOOGLE_ARCHIVE_SPREADSHEET_ID
+            </code>{" "}
             and add tabs to the archive spreadsheet (see stacked layout in code
             comments).
           </p>
@@ -183,8 +183,7 @@ function ArchivePage() {
 
       {data && dataUpdatedAt != null && (
         <p className="mt-6 text-center text-xs text-[var(--sea-ink-soft)] opacity-80">
-          Viewed at{" "}
-          {formatUpdatedAt(new Date(dataUpdatedAt).toISOString())}
+          Viewed at {formatUpdatedAt(new Date(dataUpdatedAt).toISOString())}
         </p>
       )}
     </main>

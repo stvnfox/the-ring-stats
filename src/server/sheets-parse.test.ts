@@ -9,9 +9,12 @@ import {
 } from "#/server/sheets-parse";
 
 describe("parseTournamentState", () => {
+	const earlyApril2026 = new Date("2026-04-01T12:00:00Z");
+
 	it("returns false when there are no data rows", () => {
 		expect(parseTournamentState(["status"], [[]])).toEqual({
 			hasPlannedTournament: false,
+			isInFuture: false,
 		});
 	});
 
@@ -21,6 +24,7 @@ describe("parseTournamentState", () => {
 		).toEqual({
 			hasPlannedTournament: true,
 			tournamentLabel: "Spring Cup",
+			isInFuture: false,
 		});
 	});
 
@@ -28,12 +32,14 @@ describe("parseTournamentState", () => {
 		expect(
 			parseTournamentState(
 				["status", "name", "date"],
-				[["upcoming", "Spring Cup", "2026-04-12"]],
+				[["upcoming", "Spring Cup", "12-04-2026"]],
+				{ now: earlyApril2026 },
 			),
 		).toEqual({
 			hasPlannedTournament: true,
 			tournamentLabel: "Spring Cup",
-			tournamentDate: "2026-04-12",
+			tournamentDate: "12-04-2026",
+			isInFuture: true,
 		});
 	});
 
@@ -49,6 +55,7 @@ describe("parseTournamentState", () => {
 		).toEqual({
 			hasPlannedTournament: true,
 			tournamentLabel: "Summer Clash",
+			isInFuture: false,
 		});
 	});
 
@@ -64,6 +71,7 @@ describe("parseTournamentState", () => {
 		).toEqual({
 			hasPlannedTournament: true,
 			tournamentLabel: "Bravo",
+			isInFuture: false,
 		});
 	});
 
@@ -72,6 +80,129 @@ describe("parseTournamentState", () => {
 			parseTournamentState(["status"], [["completed"], ["cancelled"]]),
 		).toEqual({
 			hasPlannedTournament: false,
+			isInFuture: false,
+		});
+	});
+
+	const mid2026 = new Date("2026-06-01T12:00:00Z");
+
+	it("hides home dashboard when the only open row has a start date before today (Europe/Amsterdam)", () => {
+		expect(
+			parseTournamentState(
+				["status", "name", "date"],
+				[["upcoming", "Old Cup", "31-05-2026"]],
+				{ now: mid2026 },
+			),
+		).toEqual({ hasPlannedTournament: false, isInFuture: false });
+	});
+
+	it("shows future-dated tournaments on the home dashboard", () => {
+		expect(
+			parseTournamentState(
+				["status", "name", "date"],
+				[["upcoming", "Next Cup", "15-06-2026"]],
+				{ now: mid2026 },
+			),
+		).toEqual({
+			hasPlannedTournament: true,
+			tournamentLabel: "Next Cup",
+			tournamentDate: "15-06-2026",
+			isInFuture: true,
+		});
+	});
+
+	it("still shows live rows when the start date is in the past", () => {
+		expect(
+			parseTournamentState(
+				["status", "name", "date"],
+				[["live", "Winter LAN", "01-12-2025"]],
+				{ now: mid2026 },
+			),
+		).toEqual({
+			hasPlannedTournament: true,
+			tournamentLabel: "Winter LAN",
+			tournamentDate: "01-12-2025",
+			isInFuture: false,
+		});
+	});
+
+	it("does not show a past-dated row when Current = yes (often left on after the event)", () => {
+		expect(
+			parseTournamentState(
+				["status", "name", "date", "current"],
+				[["upcoming", "Legacy", "01-06-2025", "yes"]],
+				{ now: mid2026 },
+			),
+		).toEqual({ hasPlannedTournament: false, isInFuture: false });
+	});
+
+	it("picks a future row when an older upcoming row is past-dated", () => {
+		expect(
+			parseTournamentState(
+				["status", "name", "date"],
+				[
+					["upcoming", "Stale", "01-01-2026"],
+					["upcoming", "Fresh", "01-09-2026"],
+				],
+				{ now: mid2026 },
+			),
+		).toEqual({
+			hasPlannedTournament: true,
+			tournamentLabel: "Fresh",
+			tournamentDate: "01-09-2026",
+			isInFuture: true,
+		});
+	});
+
+	it("uses Amsterdam calendar day so late UTC evening can already be the next NL day", () => {
+		// May 31 23:30 UTC = June 1 01:30 CEST — event 2026-05-31 is “yesterday” in NL
+		const now = new Date("2026-05-31T23:30:00.000Z");
+		expect(
+			parseTournamentState(
+				["status", "name", "date"],
+				[["upcoming", "May 31 event", "31-05-2026"]],
+				{ now },
+			),
+		).toEqual({ hasPlannedTournament: false, isInFuture: false });
+	});
+
+	it("parses DD-MM-YYYY for past vs today (Amsterdam)", () => {
+		expect(
+			parseTournamentState(
+				["status", "name", "date"],
+				[["upcoming", "Dutch fmt", "31-05-2026"]],
+				{ now: mid2026 },
+			),
+		).toEqual({ hasPlannedTournament: false, isInFuture: false });
+	});
+
+	it("parses DD-MM-YYYY for strictly future (Amsterdam)", () => {
+		expect(
+			parseTournamentState(
+				["status", "name", "date"],
+				[["upcoming", "Dutch fmt", "15-06-2026"]],
+				{ now: mid2026 },
+			),
+		).toEqual({
+			hasPlannedTournament: true,
+			tournamentLabel: "Dutch fmt",
+			tournamentDate: "15-06-2026",
+			isInFuture: true,
+		});
+	});
+
+	it("treats DD-MM-YYYY on the same NL calendar day as not past and not isInFuture", () => {
+		expect(
+			parseTournamentState(
+				["status", "name", "date"],
+				[["upcoming", "Today cup", "01-06-2026"]],
+				{ now: mid2026 },
+			),
+		).toEqual({
+			hasPlannedTournament: true,
+			tournamentLabel: "Today cup",
+			tournamentDate: "01-06-2026",
+			isInFuture: false,
 		});
 	});
 });

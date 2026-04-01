@@ -54,12 +54,11 @@ function HomeDashboard() {
         </p>
         <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--sea-ink-soft)]">
           {data && (
-            <span className="italic text-[var(--sea-ink-soft)]">
-              Last synced{" "}
-              <time dateTime={data.fetchedAt}>
-                {formatUpdatedAt(data.fetchedAt)}
+            <span className="text-[var(--sea-ink-soft)]">
+              Data last synced:
+              <time dateTime={data.fetchedAt} className="block italic">
+                {isFetching ? "Refreshing..." : formatUpdatedAt(data.fetchedAt)}
               </time>
-              {isFetching ? " · refreshing…" : ""}
             </span>
           )}
         </div>
@@ -88,7 +87,17 @@ function HomeDashboard() {
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-[var(--sea-ink-soft)]">
             There isn’t an upcoming or active event right now. Leaderboards will
-            show up here when one is planned.
+            show up here when one is planned. If you want to check the scores
+            and data from previous events, you can do so{" "}
+            <a
+              href="/archive"
+              className="text-[var(--sea-ink)] underline"
+              target="_blank"
+              rel="noreferrer"
+            >
+              here
+            </a>
+            .
           </p>
         </section>
       )}
@@ -100,13 +109,6 @@ function HomeDashboard() {
           fraggerEmptyHint="No scores available yet. Will be updated when the event starts."
           mapEmptyHint="No map data available yet. Will be updated when the event starts."
         />
-      )}
-
-      {data && dataUpdatedAt != null && (
-        <p className="mt-6 text-center text-xs text-[var(--sea-ink-soft)] opacity-80">
-          Data last updated{" "}
-          {formatUpdatedAt(new Date(dataUpdatedAt).toISOString())}
-        </p>
       )}
     </main>
   );

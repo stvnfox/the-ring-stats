@@ -120,6 +120,7 @@ export async function fetchArchiveDashboardByTab(
 		hasPlannedTournament: true,
 		tournamentLabel: split.eventLabel ?? trimmed,
 		tournamentDate: split.eventDate,
+		isInFuture: false,
 		topFraggers,
 		teamScores,
 		mapScores,
