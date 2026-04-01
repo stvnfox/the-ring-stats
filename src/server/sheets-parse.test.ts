@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
 	parseMapScores,
 	parseTeamScores,
+	parseTopFraggers,
 	parseTournamentState,
+	splitStackedArchiveValues,
 } from "#/server/sheets-parse";
 
 describe("parseTournamentState", () => {
@@ -179,5 +181,29 @@ describe("parseTeamScores", () => {
 		const rows = parseTeamScores(values);
 		expect(rows[0]).toMatchObject({ rank: 1, name: "Alpha", score: 43.2 });
 		expect(rows[1]).toMatchObject({ rank: 2, name: "Beta", score: 42.1 });
+	});
+});
+
+describe("splitStackedArchiveValues", () => {
+	it("reads meta rows and three sections for existing parsers", () => {
+		const grid = [
+			["EventName", "Spring Cup"],
+			["EventDate", "2026-01-01"],
+			["__PlayerTotals__"],
+			["Player", "TotalKills"],
+			["vex", "10"],
+			["__TeamTotals__"],
+			["Team", "TotalScore", "MatchPoint"],
+			["Alpha", "100", ""],
+			["__MapScores__"],
+			["Map", "Team", "Score"],
+			["M1", "Alpha", "16"],
+		];
+		const s = splitStackedArchiveValues(grid);
+		expect(s.eventLabel).toBe("Spring Cup");
+		expect(s.eventDate).toBe("2026-01-01");
+		expect(parseTopFraggers(s.players)).toHaveLength(1);
+		expect(parseTeamScores(s.teams)[0]?.name).toBe("Alpha");
+		expect(parseMapScores(s.maps).length).toBe(1);
 	});
 });

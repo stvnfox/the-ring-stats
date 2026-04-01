@@ -15,6 +15,17 @@ export default function Header() {
         </h2>
 
         <div className="ml-auto flex items-center gap-1.5 sm:ml-0 sm:gap-2">
+          <Link
+            to="/archive"
+            search={{ t: undefined }}
+            className="rounded-xl px-3 py-2 text-sm font-medium text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+            activeProps={{
+              className:
+                "rounded-xl px-3 py-2 text-sm font-medium text-[var(--sea-ink)] no-underline bg-[var(--link-bg-hover)]",
+            }}
+          >
+            Archive
+          </Link>
           <a
             href="https://x.com/InferXgaming"
             target="_blank"

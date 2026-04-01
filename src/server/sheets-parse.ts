@@ -750,3 +750,99 @@ export function parseMapScores(
 
 	return blocks;
 }
+
+/**
+ * Stacked archive tab layout (one sheet per event, archive spreadsheet).
+ * Column A marks sections; optional meta rows before the first marker use A=key, B=value.
+ *
+ * Markers (exact cell in column A, trimmed):
+ * - `__PlayerTotals__` — next row is header, then data (same columns as live PlayerTotals)
+ * - `__TeamTotals__` — same as live TeamTotals
+ * - `__MapScores__` — same as live MapScores (Discord or long/wide format)
+ *
+ * Supported meta keys (normalized): eventname, tournament, name → tournamentLabel;
+ * eventdate, date → tournamentDate.
+ */
+export const ARCHIVE_MARKER_PLAYER = "__PlayerTotals__";
+export const ARCHIVE_MARKER_TEAM = "__TeamTotals__";
+export const ARCHIVE_MARKER_MAP = "__MapScores__";
+
+const ARCHIVE_MARKERS = new Set([
+	ARCHIVE_MARKER_PLAYER,
+	ARCHIVE_MARKER_TEAM,
+	ARCHIVE_MARKER_MAP,
+]);
+
+export type SplitStackedArchiveResult = {
+	players: string[][];
+	teams: string[][];
+	maps: string[][];
+	eventLabel?: string;
+	eventDate?: string;
+};
+
+function isArchiveSectionMarker(cellA: string): boolean {
+	return ARCHIVE_MARKERS.has(cellA.trim());
+}
+
+export function splitStackedArchiveValues(
+	values: string[][] | null | undefined,
+): SplitStackedArchiveResult {
+	const result: SplitStackedArchiveResult = {
+		players: [],
+		teams: [],
+		maps: [],
+	};
+
+	if (!values?.length) {
+		return result;
+	}
+
+	const rows = values.map((r) => r.map((c) => String(c ?? "").trim()));
+
+	let i = 0;
+	let eventLabel: string | undefined;
+	let eventDate: string | undefined;
+
+	while (i < rows.length) {
+		const a = (rows[i]?.[0] ?? "").trim();
+		if (isArchiveSectionMarker(a)) break;
+		const b = (rows[i]?.[1] ?? "").trim();
+		const key = normalizeHeader(a).replace(/\s+/g, "");
+		if (
+			key === "eventname" ||
+			key === "tournament" ||
+			key === "tournamentname"
+		) {
+			if (b) eventLabel = b;
+		} else if (key === "eventdate" || key === "date") {
+			if (b) eventDate = b;
+		}
+		i++;
+	}
+
+	while (i < rows.length) {
+		const marker = (rows[i]?.[0] ?? "").trim();
+		if (!isArchiveSectionMarker(marker)) {
+			i++;
+			continue;
+		}
+		i++;
+		const slice: string[][] = [];
+		while (i < rows.length) {
+			const nextA = (rows[i]?.[0] ?? "").trim();
+			if (isArchiveSectionMarker(nextA)) break;
+			slice.push(rows[i]);
+			i++;
+		}
+		if (marker === ARCHIVE_MARKER_PLAYER) result.players = slice;
+		else if (marker === ARCHIVE_MARKER_TEAM) result.teams = slice;
+		else result.maps = slice;
+	}
+
+	return {
+		...result,
+		eventLabel,
+		eventDate,
+	};
+}
