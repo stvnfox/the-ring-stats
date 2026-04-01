@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 
 import type { DashboardData } from "#/lib/dashboard-types";
+import { inferTournamentWinnerFromMatchPointAndLastMap } from "#/lib/infer-tournament-winner";
 import { getSampleDashboardData } from "#/server/dashboard-dummy";
 
 import {
@@ -111,6 +112,10 @@ async function fetchSheetDashboard(): Promise<DashboardData> {
 		};
 	}
 
+	const winner = inferTournamentWinnerFromMatchPointAndLastMap(
+		teamScores,
+		mapScores,
+	);
 	return {
 		hasPlannedTournament: true,
 		tournamentLabel: tournament.tournamentLabel,
@@ -119,6 +124,7 @@ async function fetchSheetDashboard(): Promise<DashboardData> {
 		topFraggers,
 		teamScores,
 		mapScores,
+		...(winner ? { tournamentWinner: winner } : {}),
 		fetchedAt,
 	};
 }

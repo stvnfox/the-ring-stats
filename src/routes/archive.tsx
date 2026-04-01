@@ -6,6 +6,7 @@ import {
   DashboardLeaderboardsAndMaps,
   formatTournamentDate,
   formatUpdatedAt,
+  TournamentWinnerBanner,
 } from "#/components/DashboardPanels";
 import { getArchiveDashboardData } from "#/server/get-archive-dashboard-data";
 import { listArchiveTournaments } from "#/server/list-archive-tournaments";
@@ -173,12 +174,19 @@ function ArchivePage() {
       )}
 
       {data && !dataLoading && (
-        <DashboardLeaderboardsAndMaps
-          data={data}
-          teamEmptyHint="No team rows in this archive tab."
-          fraggerEmptyHint="No player rows in this archive tab."
-          mapEmptyHint="No map rows in this archive tab."
-        />
+        <>
+          {data.tournamentWinner && (
+            <div className="mt-10">
+              <TournamentWinnerBanner winner={data.tournamentWinner} />
+            </div>
+          )}
+          <DashboardLeaderboardsAndMaps
+            data={data}
+            teamEmptyHint="No team rows in this archive tab."
+            fraggerEmptyHint="No player rows in this archive tab."
+            mapEmptyHint="No map rows in this archive tab."
+          />
+        </>
       )}
 
       {data && dataUpdatedAt != null && (

@@ -5,6 +5,7 @@ import {
   DashboardLeaderboardsAndMaps,
   formatTournamentDate,
   formatUpdatedAt,
+  TournamentWinnerBanner,
 } from "#/components/DashboardPanels";
 import {
   getDashboardRefetchInterval,
@@ -100,6 +101,12 @@ function HomeDashboard() {
             .
           </p>
         </section>
+      )}
+
+      {data?.hasPlannedTournament && data.tournamentWinner && (
+        <div className="mt-10">
+          <TournamentWinnerBanner winner={data.tournamentWinner} />
+        </div>
       )}
 
       {data?.hasPlannedTournament && (

@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 
 import type { DashboardData } from "#/lib/dashboard-types";
+import { inferTournamentWinnerFromMatchPointAndLastMap } from "#/lib/infer-tournament-winner";
 import {
 	parseMapScores,
 	parseTeamScores,
@@ -115,6 +116,10 @@ export async function fetchArchiveDashboardByTab(
 	const topFraggers = parseTopFraggers(split.players);
 	const teamScores = parseTeamScores(split.teams);
 	const mapScores = parseMapScores(split.maps);
+	const winner = inferTournamentWinnerFromMatchPointAndLastMap(
+		teamScores,
+		mapScores,
+	);
 
 	return {
 		hasPlannedTournament: true,
@@ -124,6 +129,7 @@ export async function fetchArchiveDashboardByTab(
 		topFraggers,
 		teamScores,
 		mapScores,
+		...(winner ? { tournamentWinner: winner } : {}),
 		fetchedAt: new Date().toISOString(),
 	};
 }

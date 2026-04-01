@@ -1,28 +1,17 @@
 import type { DashboardData } from "#/lib/dashboard-types";
+import { inferTournamentWinnerFromMatchPointAndLastMap } from "#/lib/infer-tournament-winner";
 import { tournamentSheetDateIsStrictlyFuture } from "#/server/sheets-parse";
 
 /** Preview data for layout / design when the sheet is empty or unreachable. */
 export function getSampleDashboardData(): DashboardData {
 	const tournamentDate = "12-04-2026";
-	return {
-		hasPlannedTournament: true,
-		tournamentLabel: "Spring Cup 2026 (sample)",
-		tournamentDate,
-		isInFuture: tournamentSheetDateIsStrictlyFuture(tournamentDate),
-		topFraggers: [
-			{ rank: 1, name: "vex", score: 47 },
-			{ rank: 2, name: "nio", score: 41 },
-			{ rank: 3, name: "kade", score: 38 },
-			{ rank: 4, name: "ora", score: 35 },
-			{ rank: 5, name: "flux", score: 31 },
-		],
-		teamScores: [
-			{ rank: 1, name: "Lagoon", score: 142, onMatchPoint: true },
-			{ rank: 2, name: "Reef", score: 128 },
-			{ rank: 3, name: "Drift", score: 119 },
-			{ rank: 4, name: "Tide", score: 104 },
-		],
-		mapScores: [
+	const teamScores = [
+		{ rank: 1, name: "Lagoon", score: 142, onMatchPoint: true },
+		{ rank: 2, name: "Reef", score: 128, onMatchPoint: true },
+		{ rank: 3, name: "Drift", score: 119 },
+		{ rank: 4, name: "Tide", score: 104 },
+	];
+	const mapScores = [
 			{
 				mapName: "Inferno",
 				teams: [
@@ -94,34 +83,53 @@ export function getSampleDashboardData(): DashboardData {
 				teams: [
 					{
 						placement: 1,
-						teamName: "Drift",
+						teamName: "Lagoon",
 						playerScores: [
-							{ name: "sol", score: 25 },
-							{ name: "eli", score: 22 },
+							{ name: "vex", score: 25 },
+							{ name: "kade", score: 20 },
 						],
 						total: 47,
 					},
 					{
 						placement: 2,
-						teamName: "Tide",
+						teamName: "Drift",
 						playerScores: [
-							{ name: "neo", score: 20 },
-							{ name: "ada", score: 16 },
+							{ name: "sol", score: 22 },
+							{ name: "eli", score: 18 },
 						],
 						total: 36,
 					},
 					{
 						placement: 3,
-						teamName: "Lagoon",
+						teamName: "Tide",
 						playerScores: [
-							{ name: "vex", score: 19 },
-							{ name: "kade", score: 14 },
+							{ name: "neo", score: 16 },
+							{ name: "ada", score: 12 },
 						],
 						total: 33,
 					},
 				],
 			},
+	];
+	const tournamentWinner = inferTournamentWinnerFromMatchPointAndLastMap(
+		teamScores,
+		mapScores,
+	);
+	return {
+		hasPlannedTournament: true,
+		tournamentLabel: "Spring Cup 2026 (sample)",
+		tournamentDate,
+		isInFuture: tournamentSheetDateIsStrictlyFuture(tournamentDate),
+		topFraggers: [
+			{ rank: 1, name: "vex", score: 47 },
+			{ rank: 2, name: "nio", score: 41 },
+			{ rank: 3, name: "kade", score: 38 },
+			{ rank: 4, name: "ora", score: 35 },
+			{ rank: 5, name: "flux", score: 31 },
 		],
+		teamScores,
+		mapScores,
+		...(tournamentWinner ? { tournamentWinner } : {}),
 		fetchedAt: new Date().toISOString(),
 		isSampleData: true,
 	};

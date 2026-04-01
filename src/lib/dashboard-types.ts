@@ -1,3 +1,8 @@
+export type TournamentWinnerInfo = {
+	teamName: string;
+	playerNames: string[];
+};
+
 export type LeaderboardRow = {
 	rank: number;
 	name: string;
@@ -37,6 +42,12 @@ export type DashboardData = {
 	teamScores: LeaderboardRow[];
 	/** Per-map team scores from the Map scores tab */
 	mapScores: MapScoreBlock[];
+	/**
+	 * At least one team on match point in TeamTotals; winner is **placement 1** on the map with
+	 * the **highest map number** in the Map column (digits in `mapName`). No digits → last block.
+	 * `playerNames` come from that map row’s player columns (sheet order).
+	 */
+	tournamentWinner?: TournamentWinnerInfo;
 	fetchedAt: string;
 	/** True when `DASHBOARD_USE_DUMMY_DATA` filled in empty/error/missing-sheet responses */
 	isSampleData?: boolean;

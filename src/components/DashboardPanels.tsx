@@ -14,7 +14,13 @@ import {
   TableRow,
 } from "#/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
-import type { DashboardData, LeaderboardRow, MapScoreBlock } from "#/lib/dashboard-types";
+import type {
+  DashboardData,
+  LeaderboardRow,
+  MapScoreBlock,
+  TournamentWinnerInfo,
+} from "#/lib/dashboard-types";
+import { teamDisplayNameWithTeam } from "#/lib/team-display-name";
 import { parseTournamentSheetDateToYmd } from "#/lib/tournament-sheet-date";
 
 export function formatScore(score: number | null) {
@@ -31,6 +37,43 @@ export function formatUpdatedAt(iso: string) {
   } catch {
     return iso;
   }
+}
+
+export function TournamentWinnerBanner({
+  winner,
+}: {
+  winner: TournamentWinnerInfo;
+}) {
+  const teamLine = teamDisplayNameWithTeam(winner.teamName);
+  const playersLine =
+    winner.playerNames.length > 0 ? winner.playerNames.join(" x ") : null;
+  const ariaLabel = playersLine
+    ? `Tournament winner: ${playersLine}, ${teamLine}`
+    : `Tournament winner: ${teamLine}`;
+  return (
+    <aside
+      className="mb-10 rounded-2xl border border-[var(--lagoon)]/40 bg-[linear-gradient(135deg,rgba(79,184,178,0.14),rgba(47,106,74,0.07))] px-6 py-6 sm:px-8 sm:py-7 dark:border-[var(--line)] dark:bg-[linear-gradient(165deg,var(--surface-strong),var(--surface))] dark:shadow-[inset_0_1px_0_0_var(--inset-glint),0_10px_28px_rgba(0,0,0,0.32)] dark:backdrop-blur-sm"
+      aria-label={ariaLabel}
+    >
+      <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--lagoon-deep)] dark:text-[var(--kicker)]">
+        Tournament winner
+      </p>
+      {playersLine ? (
+        <>
+          <p className="text-2xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-3xl">
+            {playersLine}
+          </p>
+          <p className="mt-1 text-base font-semibold tracking-tight text-[var(--sea-ink-soft)] sm:text-lg">
+            {teamLine}
+          </p>
+        </>
+      ) : (
+        <p className="text-2xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-3xl">
+          {teamLine}
+        </p>
+      )}
+    </aside>
+  );
 }
 
 export function formatTournamentDate(raw: string | undefined) {
