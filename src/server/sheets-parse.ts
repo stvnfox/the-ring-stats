@@ -524,6 +524,8 @@ function pickTeamLeaderboardRows(
 	return out;
 }
 
+export const TOP_FRAGGERS_LIMIT = 20;
+
 export function parseTopFraggers(
 	values: string[][] | null | undefined,
 ): LeaderboardRow[] {
@@ -535,7 +537,7 @@ export function parseTopFraggers(
 		NAME_KEYS,
 		PLAYER_TOTAL_KILL_KEYS,
 	);
-	return assignRanks(rows);
+	return assignRanks(rows).slice(0, TOP_FRAGGERS_LIMIT);
 }
 
 const TEAM_NAME_KEYS = ["team", "team name", "squad", "clan", "tag"];

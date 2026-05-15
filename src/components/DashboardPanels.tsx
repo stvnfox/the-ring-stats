@@ -52,10 +52,10 @@ export function TournamentWinnerBanner({
     : `Tournament winner: ${teamLine}`;
   return (
     <aside
-      className="mb-10 rounded-2xl border border-[var(--lagoon)]/40 bg-[linear-gradient(135deg,rgba(79,184,178,0.14),rgba(47,106,74,0.07))] px-6 py-6 sm:px-8 sm:py-7 dark:border-[var(--line)] dark:bg-[linear-gradient(165deg,var(--surface-strong),var(--surface))] dark:shadow-[inset_0_1px_0_0_var(--inset-glint),0_10px_28px_rgba(0,0,0,0.32)] dark:backdrop-blur-sm"
+      className="winner-banner mb-10 rounded-2xl px-6 py-6 backdrop-blur-sm sm:px-8 sm:py-7"
       aria-label={ariaLabel}
     >
-      <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--lagoon-deep)] dark:text-[var(--kicker)]">
+      <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--kicker)]">
         Tournament winner
       </p>
       {playersLine ? (
@@ -123,7 +123,7 @@ export function DashboardLeaderboardsAndMaps({
         />
         <LeaderboardCard
           title="Top fraggers"
-          description="Individual scores per player."
+          description="Top 20 individual scores per player."
           rows={data.topFraggers}
           scoreHeader="Score"
           emptyHint={fraggerEmptyHint}
@@ -303,7 +303,7 @@ function LeaderboardCard({
                     <span className="inline-flex flex-wrap items-center gap-2">
                       {row.name}
                       {showMatchPoint && row.onMatchPoint ? (
-                        <span className="rounded-full border border-[var(--lagoon)]/45 bg-[rgba(79,184,178,0.14)] px-2 py-0.5 text-xs font-semibold tracking-wide text-[var(--lagoon-deep)] uppercase">
+                        <span className="match-point-badge rounded-full px-2 py-0.5 text-xs font-semibold tracking-wide uppercase">
                           Match point
                         </span>
                       ) : null}

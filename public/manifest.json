@@ -1,7 +1,7 @@
 {
-  "short_name": "The Ring",
-  "name": "The Ring — Tourney stats",
-  "description": "Live tournament leaderboards and map scores for The Ring by InferX.",
+  "short_name": "proBots x Blackout",
+  "name": "proBots x Blackout — Tournament Stats",
+  "description": "Live tournament leaderboards and map scores for proBots x Blackout.",
   "icons": [
     {
       "src": "/favicon.ico",
@@ -11,6 +11,6 @@
   ],
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#173a40",
-  "background_color": "#e7f3ec"
+  "theme_color": "#120820",
+  "background_color": "#07040f"
 }

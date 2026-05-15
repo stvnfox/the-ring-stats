@@ -6,6 +6,7 @@ import {
 	parseTopFraggers,
 	parseTournamentState,
 	splitStackedArchiveValues,
+	TOP_FRAGGERS_LIMIT,
 } from "#/server/sheets-parse";
 
 describe("parseTournamentState", () => {
@@ -312,6 +313,22 @@ describe("parseTeamScores", () => {
 		const rows = parseTeamScores(values);
 		expect(rows[0]).toMatchObject({ rank: 1, name: "Alpha", score: 43.2 });
 		expect(rows[1]).toMatchObject({ rank: 2, name: "Beta", score: 42.1 });
+	});
+});
+
+describe("parseTopFraggers", () => {
+	it(`returns at most ${TOP_FRAGGERS_LIMIT} players ranked by score`, () => {
+		const values = [
+			["Player", "TotalKills"],
+			...Array.from({ length: 25 }, (_, i) => [
+				`player-${i + 1}`,
+				String(100 - i),
+			]),
+		];
+		const rows = parseTopFraggers(values);
+		expect(rows).toHaveLength(TOP_FRAGGERS_LIMIT);
+		expect(rows[0]).toMatchObject({ rank: 1, name: "player-1", score: 100 });
+		expect(rows[19]).toMatchObject({ rank: 20, name: "player-20", score: 81 });
 	});
 });
 

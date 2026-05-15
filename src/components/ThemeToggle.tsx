@@ -4,7 +4,7 @@ type ThemeMode = 'light' | 'dark' | 'auto'
 
 function getInitialMode(): ThemeMode {
   if (typeof window === 'undefined') {
-    return 'auto'
+    return 'dark'
   }
 
   const stored = window.localStorage.getItem('theme')
@@ -12,7 +12,7 @@ function getInitialMode(): ThemeMode {
     return stored
   }
 
-  return 'auto'
+  return 'dark'
 }
 
 function applyThemeMode(mode: ThemeMode) {
@@ -32,7 +32,7 @@ function applyThemeMode(mode: ThemeMode) {
 }
 
 export default function ThemeToggle() {
-  const [mode, setMode] = useState<ThemeMode>('auto')
+  const [mode, setMode] = useState<ThemeMode>('dark')
 
   useEffect(() => {
     const initialMode = getInitialMode()
@@ -73,7 +73,7 @@ export default function ThemeToggle() {
       onClick={toggleMode}
       aria-label={label}
       title={label}
-      className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5"
+      className="brand-chip rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] transition hover:-translate-y-0.5"
     >
       {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Dark' : 'Light'}
     </button>

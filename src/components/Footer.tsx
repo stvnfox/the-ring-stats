@@ -5,11 +5,11 @@ export default function Footer() {
     <footer className="page-wrap mx-auto flex items-center justify-between mt-10 border-t border-[var(--line)] px-4 pb-14 pt-10 text-[var(--sea-ink-soft)]">
       <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
         <p className="m-0 text-sm">
-          &copy; {year} InferX. All rights reserved.
+          &copy; {year} proBots x Blackout. All rights reserved.
         </p>
       </div>
       <div className="flex justify-center items-center gap-4">
-        <a
+        {/* <a
           href="https://x.com/InferXgaming"
           target="_blank"
           rel="noreferrer"
@@ -22,9 +22,9 @@ export default function Footer() {
               d="M12.6 1h2.2L10 6.48 15.64 15h-4.41L7.78 9.82 3.23 15H1l5.14-5.84L.72 1h4.52l3.12 4.73L12.6 1zm-.77 12.67h1.22L4.57 2.26H3.26l8.57 11.41z"
             />
           </svg>
-        </a>
+        </a> */}
         <a
-          href="https://discord.gg/d77nRuYRyn"
+          href="https://discord.gg/EwctmsjPrW"
           target="_blank"
           rel="noreferrer"
           className="hidden rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)] sm:block"
@@ -37,7 +37,7 @@ export default function Footer() {
             />
           </svg>
         </a>
-        <a
+        {/* <a
           href="https://www.twitch.tv/inferxgaming"
           target="_blank"
           rel="noreferrer"
@@ -50,7 +50,7 @@ export default function Footer() {
               d="M21.001 3V14.7391L16.3053 19.4348H12.3923L9.95523 21.7826H6.91402V19.4348H3.00098V6.13043L4.2281 3H21.001ZM19.4358 4.56522H6.13141V16.3043H9.26185V18.6522L11.6097 16.3043H16.3053L19.4358 13.1739V4.56522ZM16.3053 7.69565V12.3913H14.7401V7.69565H16.3053ZM12.3923 7.69565V12.3913H10.8271V7.69565H12.3923Z"
             />
           </svg>
-        </a>
+        </a> */}
       </div>
     </footer>
   );

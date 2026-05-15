@@ -7,10 +7,10 @@ export default function Header() {
         <h2 className="m-0 flex-shrink-0 text-base font-semibold tracking-tight">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm text-[var(--sea-ink)] no-underline shadow-[0_8px_24px_rgba(30,90,72,0.08)] sm:px-4 sm:py-2"
+            className="brand-chip uppercase inline-flex items-center gap-2 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm text-[var(--sea-ink)] no-underline sm:px-4 sm:py-2"
           >
-            <span className="h-2 w-2 rounded-full bg-[linear-gradient(90deg,#56c6be,#7ed3bf)]" />
-            InferX - The Ring
+            {/* <span className="h-2 w-2 rounded-full bg-[linear-gradient(90deg,#56c6be,#7ed3bf)]" /> */}
+            proBots x Blackout
           </Link>
         </h2>
 
@@ -26,7 +26,7 @@ export default function Header() {
           >
             Archive
           </Link>
-          <a
+          {/* <a
             href="https://x.com/InferXgaming"
             target="_blank"
             rel="noreferrer"
@@ -39,9 +39,9 @@ export default function Header() {
                 d="M12.6 1h2.2L10 6.48 15.64 15h-4.41L7.78 9.82 3.23 15H1l5.14-5.84L.72 1h4.52l3.12 4.73L12.6 1zm-.77 12.67h1.22L4.57 2.26H3.26l8.57 11.41z"
               />
             </svg>
-          </a>
+          </a> */}
           <a
-            href="https://discord.gg/d77nRuYRyn"
+            href="https://discord.gg/EwctmsjPrW"
             target="_blank"
             rel="noreferrer"
             className="hidden rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)] sm:block"
@@ -54,7 +54,7 @@ export default function Header() {
               />
             </svg>
           </a>
-          <a
+          {/* <a
             href="https://www.twitch.tv/inferxgaming"
             target="_blank"
             rel="noreferrer"
@@ -67,7 +67,7 @@ export default function Header() {
                 d="M21.001 3V14.7391L16.3053 19.4348H12.3923L9.95523 21.7826H6.91402V19.4348H3.00098V6.13043L4.2281 3H21.001ZM19.4358 4.56522H6.13141V16.3043H9.26185V18.6522L11.6097 16.3043H16.3053L19.4358 13.1739V4.56522ZM16.3053 7.69565V12.3913H14.7401V7.69565H16.3053ZM12.3923 7.69565V12.3913H10.8271V7.69565H12.3923Z"
               />
             </svg>
-          </a>
+          </a> */}
         </div>
 
         {/* <div className="order-3 flex w-full flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm font-semibold sm:order-2 sm:w-auto sm:flex-nowrap sm:pb-0">
